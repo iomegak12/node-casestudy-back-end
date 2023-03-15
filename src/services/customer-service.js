@@ -20,7 +20,7 @@ class CustomerService {
 
     async getCustomers() {
         try {
-            await mongoose.connect(this.connectionString, CONNECTION_OPTIONS);
+            await mongoose.connect(this.connectionString);
 
             const customers = await CustomerModel.find({});
 
@@ -41,7 +41,7 @@ class CustomerService {
         try {
             await mongoose.connect(this.connectionString, CONNECTION_OPTIONS);
 
-            const customerDetail = CustomerModel.findOne({
+            const customerDetail = await CustomerModel.findOne({
                 profileId: profileId
             });
 
@@ -64,7 +64,18 @@ class CustomerService {
         try {
             await mongoose.connect(this.connectionString, CONNECTION_OPTIONS);
 
-            const savedRecord = await CustomerModel.save(customerDetail);
+            const newCustomerRecord = new CustomerModel({
+                profileId: customerDetail.profileId,
+                businessName: customerDetail.businessName,
+                businessAddress: customerDetail.businessAddress,
+                creditLimit: customerDetail.creditLimit,
+                activeStatus: customerDetail.activeStatus,
+                email: customerDetail.email,
+                phoneNumber: customerDetail.phoneNumber,
+                remarks: customerDetail.remarks
+            });
+
+            const savedRecord = await newCustomerRecord.save();
 
             return savedRecord;
         } catch (error) {
