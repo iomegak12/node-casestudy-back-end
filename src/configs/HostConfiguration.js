@@ -7,7 +7,8 @@ class HostConfiguration {
         const SSL_ENABLED = process.env.SSL_ENABLED || DEFAULT_SSL_OPTION;
 
         return {
-            SERVICE_PORT
+            SERVICE_PORT,
+            SSL_ENABLED
         };
     }
 }

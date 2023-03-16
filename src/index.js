@@ -1,13 +1,23 @@
 import { CustomerServiceHost } from './hosting/index.js';
-import { HostConfiguration } from './configs/index.js';
+import { HostConfiguration, SSLConfiguration } from './configs/index.js';
 
 class MainClass {
     static async main() {
         try {
             const hostConfiguration = HostConfiguration.getConfiguration();
+            
+            let customerServiceHost = null;
 
-            const customerServiceHost = new CustomerServiceHost(
-                hostConfiguration.SERVICE_PORT);
+            if (hostConfiguration.SSL_ENABLED) {
+                const sslConfiguration = SSLConfiguration.getConfiguration();
+                customerServiceHost = new CustomerServiceHost(
+                    hostConfiguration.SERVICE_PORT,
+                    hostConfiguration.SSL_ENABLED,
+                    sslConfiguration
+                );
+            } else {
+                customerServiceHost = new CustomerServiceHost(hostConfiguration.SERVICE_PORT);
+            }
 
             await customerServiceHost.startServer();
 
