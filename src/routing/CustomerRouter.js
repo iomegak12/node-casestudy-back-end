@@ -6,11 +6,14 @@ const NOT_FOUND = 404;
 const BAD_REQUEST = 400;
 const SERVER_ERROR = 500;
 const RECORD_CREATED = 201;
+const NEW_CUSTOMER_RECORD = 'NewCustomerRecord';
 
 class CustomerRouter {
-    constructor() {
+    constructor(socketIOServer) {
         this.customerRouter = express.Router();
         this.customerService = new CustomerService();
+        this.socketIOServer = socketIOServer;
+
         this.initializeRouting();
     }
 
@@ -96,6 +99,10 @@ class CustomerRouter {
                         });
 
                     return;
+                }
+
+                if(this.socketIOServer) {
+                    this.socketIOServer.emit(NEW_CUSTOMER_RECORD, addedRecord);
                 }
 
                 response
