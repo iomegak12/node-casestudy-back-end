@@ -3,14 +3,18 @@ import http from 'http';
 import https from 'https';
 import fs from 'fs';
 import bodyparser from 'body-parser';
-import { CustomerRouter } from '../routing/index.js';
 import morgan from 'morgan';
+import { expressjwt } from 'express-jwt';
+
+import { CustomerRouter } from '../routing/index.js';
 import { Server } from 'socket.io';
+import { AuthConfiguration } from '../configs/index.js';
 
 const INVALID_SERVICE_PORT = 'Invalid Service Port Specified!';
 const CUSTOMER_SERVICE_BASE_URL = '/api/v1/customers';
 const INVALID_SSL_CONFIGURATION = 'Invalid SSL (Certificate/Private Key) Configuration Specified!';
 const PUBLIC_STATIC_URL = '/';
+const UNAUTHORIZED = 401;
 
 class CustomerServiceHost {
     constructor(portNumber, isSSLEnabled = false, sslConfiguration = {}) {
@@ -45,6 +49,8 @@ class CustomerServiceHost {
         this.socketIOServer = new Server(this.webServer);
         this.customerRouter = new CustomerRouter(this.socketIOServer);
 
+        this.authConfiguration = AuthConfiguration.getConfiguration();
+
         this.initializeMiddleware();
     }
 
@@ -52,7 +58,29 @@ class CustomerServiceHost {
         this.app.use(morgan('combined'));
         this.app.use(bodyparser.json());
         this.app.use(this.applyCors);
+
+        this.app.use((error, request, response, next) => {
+            if (error.construtor.name === 'UnauthorizedError') {
+                response
+                    .status(UNAUTHORIZED)
+                    .send({
+                        errorMessage: 'Unauthorized Request Access!'
+                    });
+
+                return;
+            }
+
+            next();
+        });
+
         this.app.use(PUBLIC_STATIC_URL, express.static('../public'));
+
+        this.app.use(CUSTOMER_SERVICE_BASE_URL,
+            expressjwt({
+                secret: this.authConfiguration.AUTH_SECRET_KEY,
+                algorithms: ['HS256']
+            }));
+
         this.app.use(CUSTOMER_SERVICE_BASE_URL, this.customerRouter.Router);
     }
 
