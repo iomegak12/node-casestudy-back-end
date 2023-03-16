@@ -1,4 +1,4 @@
-import CustomerService from "./customer-service.js";
+import CustomerService from "./CustomerService.js";
 
 export {
     CustomerService

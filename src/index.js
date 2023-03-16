@@ -1,40 +1,25 @@
-import { CustomerService } from "./services/index.js";
+import { CustomerServiceHost } from './hosting/index.js';
+import { HostConfiguration } from './configs/index.js';
 
 class MainClass {
     static async main() {
         try {
-            const customerServiceObject = new CustomerService();
+            const hostConfiguration = HostConfiguration.getConfiguration();
 
-            // const newRecord = {
-            //     profileId: "PROF10001",
-            //     businessName: "Northwind Traders",
-            //     contactAddress: "Bangalore",
-            //     creditLimit: 23000,
-            //     activeStatus: true,
-            //     email: "info@nwt.com",
-            //     phoneNumber: "080-39849384",
-            //     remarks: "Simple Customer Record"
-            // };
+            const customerServiceHost = new CustomerServiceHost(
+                hostConfiguration.SERVICE_PORT);
 
-            // const savedRecord = await customerServiceObject.saveCustomerDetail(newRecord);
+            await customerServiceHost.startServer();
 
-            // console.log(savedRecord);
+            console.info('Customer Service Host Started Successfully!');
 
-            // console.log("Retrieving Records ...");
+            const stopHost = async () => {
+                await customerServiceHost.stopServer();
+                console.info('Customer Service Host Stopped Successfully!');
+            };
 
-            // const customerRecords = await customerServiceObject.getCustomers();
-
-            // for (const customerRecord of customerRecords) {
-            //     console.log(customerRecord.profileId);
-            // }
-
-            console.log("Retrieving Records Specific ...");
-
-            const filtedCustomerRecords = await customerServiceObject.getCustomerDetail('PROF10001');
-
-            for (const customerRecord of customerRecords) {
-                console.log(customerRecord.businessName);
-            }
+            process.on('exit', stopHost);
+            process.on('SIGINT', stopHost);
         } catch (error) {
             console.error(`Error Occurred, Details : ${error}`);
         }
@@ -42,6 +27,4 @@ class MainClass {
 }
 
 MainClass
-    .main()
-    .then(() => console.log('Program completed!'))
-    .catch(error => console.log('Something went wrong!'));
+    .main();

@@ -1,6 +1,6 @@
 const DEFAULT_MONGO_HOST = "localhost";
 const DEFAULT_MONGO_PORT = "27017";
-const DEFAULT_MONGO_DB = "crmdb";
+const DEFAULT_MONGO_DB = "crmsystemdb";
 
 class ConnectionStringBuilder {
     static getConnectionString() {
